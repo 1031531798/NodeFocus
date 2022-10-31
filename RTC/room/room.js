@@ -8,16 +8,19 @@ class RtcRoom {
   }
 
   join (user) {
-    if (this.roomPerson.get(user.id)) {
-      return '已在房间 不可重复加入'
+    if (this.roomPerson.get(user)) {
+      return false
     }else{
-      this.roomPerson.set(user.id, user)
-      return '加入成功'
+      this.roomPerson.set(user, {
+        userId: user,
+        joinTime: new Date().getTime()
+      })
+      return true
     }
   }
 
   exit (user) {
-    this.roomPerson.delete(user.id)
+    this.roomPerson.delete(user)
     return '退出成功'
   }
 }

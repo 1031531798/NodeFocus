@@ -2,6 +2,7 @@ const { Console } = require('console');
 const http = require('http');
 const { Server } = require("socket.io");
 const { RtcRoom } = require('../RTC/room/room');
+const { stringify } = require('./utile');
 const roomList = []
 function initSocket (app) {
   const server = http.createServer(app);
@@ -25,17 +26,29 @@ function initSocket (app) {
     socket.on('createRoom', (data) => {
       console.log('创建房间')
       roomList.push(new RtcRoom({
-        id: Math.random() * 10000000,
+        id: Math.floor(Math.random() * 10000000),
         createUser: socket.id,
         roomSize: 10
       }))
-      socket.emit('roomList', JSON.stringify(roomList))
+      socket.emit('roomList', stringify(roomList))
     })
-    socket.on('join', () => {
+    socket.on('join', (roomId) => {
+      let flag = false
+      let room
+      if (roomId) {
+        room = roomList.find(item => Number(item.id) === Number(roomId))
+        if (room) {
+          room.join(socket.id) && (flag = true)
+        }
+      }
+      socket.emit('join', stringify({
+        success: flag,
+        data: room
+      }))
 
     })
     socket.on('roomList', (data) => {
-      socket.emit('roomList', JSON.stringify(roomList))
+      socket.emit('roomList', stringify(roomList))
 
       console.log("用户"+socket.id+"登录");
     })
