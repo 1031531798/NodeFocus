@@ -7,6 +7,13 @@ class RtcRoom {
     this.roomPerson = new Map()
   }
 
+  getRoomData () {
+    return {
+      ...this,
+      roomPerson: [...this.roomPerson.values()]
+    }
+  }
+
   join (user) {
     if (this.roomPerson.get(user)) {
       return false
@@ -21,7 +28,7 @@ class RtcRoom {
 
   exit (user) {
     this.roomPerson.delete(user)
-    return '退出成功'
+    return true
   }
 }
 

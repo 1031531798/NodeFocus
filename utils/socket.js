@@ -15,21 +15,24 @@ function initSocket (app) {
     console.log('用户已连接socket');
     socket.on('disconnect',()=>{
       //监听用户断开事件
-      console.log("用户"+socket.id+"断开连接");
+      io.in(socket.id).disconnectSockets()
+      console.log("用户"+socket.id+"断开连接", socket.rooms);
     });
      // 连接就调用登录
-    socket.emit('login', socket.id)
      //监听login事件 返回socket用户id
-    socket.on('login', (data) => {
-      console.log("用户"+socket.id+"登录");
+     socket.on('login', (data) => {
+       console.log("用户"+socket.id+"登录");
+       socket.emit('login', socket.id)
     })
     socket.on('createRoom', (data) => {
       console.log('创建房间')
-      roomList.push(new RtcRoom({
+      const room = new RtcRoom({
         id: Math.floor(Math.random() * 10000000),
         createUser: socket.id,
         roomSize: 10
-      }))
+      })
+      roomList.push(room)
+      // 加入指定房间
       socket.emit('roomList', stringify(roomList))
     })
     socket.on('join', (roomId) => {
@@ -41,18 +44,35 @@ function initSocket (app) {
           room.join(socket.id) && (flag = true)
         }
       }
+      // 给对应房间 推送事件
+      if (flag) {
+        io.in(socket.id).socketsJoin(roomId)
+        io.to(roomId).emit('roomChange', stringify(room.getRoomData()))
+      }
       socket.emit('join', stringify({
         success: flag,
-        data: room
+        data: room ? room.getRoomData(socket) : {}
       }))
-
+    })
+    socket.on('exit', (roomId) => {
+      let flag = false
+      let room
+      if (roomId) {
+        room = roomList.find(item => Number(item.id) === Number(roomId))
+        if (room) {
+          room.exit(socket.id) && (flag = true)
+        }
+      }
+      // 给对应房间 推送事件
+      if (flag) {
+        io.to(roomId).emit('roomChange', stringify(room.getRoomData()))
+        socket.leave(roomId)
+      }
+      console.log('离开房间',socket.rooms)
     })
     socket.on('roomList', (data) => {
       socket.emit('roomList', stringify(roomList))
-
-      console.log("用户"+socket.id+"登录");
     })
-    
   })
   io.listen(3000);
 }
