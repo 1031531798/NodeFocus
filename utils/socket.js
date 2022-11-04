@@ -1,16 +1,23 @@
-const { Console } = require('console');
-const http = require('http');
+const { createServer } = require("https");
 const { Server } = require("socket.io");
 const { RtcRoom } = require('../RTC/room/room');
+const fs = require('fs');
 const { stringify } = require('./utile');
 const roomList = []
 const userRoom = {}
 function initSocket (app) {
-  const server = http.createServer(app);
+  let pemPath = process.cwd() + '\\bin\\';
+
+  const options = {
+    key: fs.readFileSync(pemPath + 'localhost+5-key.pem'),
+    cert: fs.readFileSync(pemPath + 'localhost+5.pem'),
+  };
+  const server = createServer(options);
   const io = new Server(server, { cors: {
     credentials: true,
     // 跨域过滤源
-    origin: ["http://localhost:8796", 'http://localhost:3100', 'http://localhost:8080', 'http://192.168.19.129:8080'],
+    origin:'*',
+    // origin: ["http://localhost:8796", 'http://localhost:3100', 'http://localhost:8080', 'http://192.168.19.129:8080'],
   } });
   io.on('connection', (socket) => {
     console.log('用户已连接socket');
@@ -90,7 +97,7 @@ function initSocket (app) {
         socket.to(data.roomid).emit('__ice_candidate',data);
     });
   })
-  io.listen(3000);
+  server.listen(3000);
 }
 
 module.exports = {initSocket}
