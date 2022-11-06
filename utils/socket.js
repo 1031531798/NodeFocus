@@ -98,6 +98,7 @@ function initSocket (app) {
     });
   })
   server.listen(3000);
+  console.log('socket https:3000')
 }
 
 module.exports = {initSocket}
