@@ -60,6 +60,7 @@ function initSocket (app) {
       if (flag) {
         io.in(socket.id).socketsJoin(roomId)
         io.to(roomId).emit('roomChange', stringify(room.getRoomData()))
+        io.to(roomId).emit('addUser', socket.id)
         // 保存进入的房间id
         socket.data.roomId = roomId
       }
@@ -81,6 +82,7 @@ function initSocket (app) {
       if (flag) {
         socket.leave(roomId)
         io.to(roomId).emit('roomChange', stringify(room.getRoomData()))
+        io.to(roomId).emit('exit', socket.id)
       }
       console.log('离开房间',socket.rooms)
     })
