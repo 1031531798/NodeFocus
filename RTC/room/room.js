@@ -5,12 +5,17 @@ class RtcRoom {
     this.roomSize = roomSize
     this.createDate = new Date().getTime()
     this.roomPerson = new Map()
+    this.personNum = 0
   }
 
   getRoomData () {
+    const persons = []
+    for (const value of this.roomPerson.values()) {
+      persons.push(value)
+    }
     return {
       ...this,
-      roomPerson: [...this.roomPerson.values()]
+      roomPerson: persons
     }
   }
 
@@ -22,12 +27,14 @@ class RtcRoom {
         userId: user,
         joinTime: new Date().getTime()
       })
+      this.personNum = this.roomPerson.size
       return true
     }
   }
 
   exit (user) {
     this.roomPerson.delete(user)
+    this.personNum = this.roomPerson.size
     return true
   }
 }

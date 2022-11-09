@@ -86,14 +86,14 @@ function initSocket (app) {
       }
       console.log('离开房间',socket.rooms)
     })
-    socket.on('roomList', (data) => {
+    socket.on('roomList', () => {
       socket.emit('roomList', stringify(roomList))
     })
     socket.on('offer', data=>{
       socket.to(data.roomid).emit('offer',data);
     });
     socket.on('answer', data=>{
-        socket.to(data.roomid).emit('answer',data);
+      socket.to(data.roomid).emit('answer',data);
     });
     socket.on('__ice_candidate', data=>{
         socket.to(data.roomid).emit('__ice_candidate',data);
