@@ -28,6 +28,7 @@ function initSocket (app) {
       const roomId = socket.data.roomId
       const room = roomList.find(item => item.id === roomId)
       room && room.exit(socket.id)
+      io.to(roomId).emit('exit', socket.id)
       io.in(socket.id).disconnectSockets()
     });
      // 连接就调用登录
