@@ -99,6 +99,16 @@ function initSocket (app) {
     socket.on('__ice_candidate', data=>{
         socket.to(data.roomid).emit('__ice_candidate',data);
     });
+    socket.on('message', (data) => {
+      const roomId = socket.data.roomId
+      const message = {
+        msg: data,
+        userId: socket.id,
+        roomId
+      }
+      io.to(roomId).emit('message', stringify(message))
+      console.log(message, '发送房间消息')
+    })
   })
   server.listen(3000);
   console.log('socket https:3000')
