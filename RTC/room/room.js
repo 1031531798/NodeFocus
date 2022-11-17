@@ -1,3 +1,5 @@
+const { stringify } = require("../../utils/utile")
+
 class RtcRoom {
   constructor ({id, createUser, roomSize}) {
     this.id = id
@@ -6,6 +8,7 @@ class RtcRoom {
     this.createDate = new Date().getTime()
     this.roomPerson = new Map()
     this.personNum = 0
+    this.messageList = []
   }
 
   getRoomData () {
@@ -36,6 +39,10 @@ class RtcRoom {
     this.roomPerson.delete(user)
     this.personNum = this.roomPerson.size
     return true
+  }
+
+  addMessage (message) {
+    this.messageList.push(message)
   }
 }
 

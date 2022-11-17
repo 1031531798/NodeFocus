@@ -65,9 +65,10 @@ function initSocket (app) {
         // 保存进入的房间id
         socket.data.roomId = roomId
       }
+      console.log('roomchange', stringify(room.getRoomData()))
       socket.emit('join', stringify({
         success: flag,
-        data: room ? room.getRoomData(socket) : {}
+        data: room ? room.getRoomData() : {}
       }))
     })
     socket.on('exit', (roomId) => {
@@ -107,11 +108,19 @@ function initSocket (app) {
         roomId
       }
       io.to(roomId).emit('message', stringify(message))
+      const room = getRoom(socket)
+      room.addMessage(message)
       console.log(message, '发送房间消息')
     })
   })
   server.listen(3000);
   console.log('socket https:3000')
+}
+
+function getRoom (socket) {
+  const roomId = socket.data.roomId
+  const room = roomList.find(item => item.id === roomId)
+  return room
 }
 
 module.exports = {initSocket}
