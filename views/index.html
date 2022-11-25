@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>node server</title>
+  <style>
+    .image-item{
+      width:300px;
+      margin: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    一个 Node 的服务器应用
+    <button onclick="getImage()">获取图片</button>
+    <input type="file" id="fileInput" accept="image/jpg, imagqe/png"></input>
+    <button onclick="uploadImage()">确认上传</button>
+    <div id="imageList">
+    </div>
+  </div>
+</body>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script src="../public/socket.io.js"></script>
+<script>
+  let imageIndex = 0;
+  let imageList = ['/file/getImages/aqua.jpg', '/file/getImages/caoyuan.png', '/file/getImages/clund.jpg', '/file/getImages/dao.jpg', '/file/getImages/header.jpg', '/file/getImages/qipao.png'];
+  let list = document.getElementById('imageList');
+  function getImageFilePath () {
+    if (imageIndex === imageList.length) {
+      imageIndex = 0;
+    }
+    let path = '/file/getImages/' + decodeURI(imageList[imageIndex]);
+    imageIndex++;
+    console.log(imageList[imageIndex])
+    return path;
+  }
+  function getGrahql () {
+    axios.get('/graphql', {
+      params: {
+        query: '{ typeList }'
+      }
+    }).then((res) => {
+    })
+  }
+  function getImage () {
+    axios.get(getImageFilePath(),{
+      responseType: 'arraybuffer'
+    }).then((res) => {
+      let imageNode = document.createElement('img');
+      imageNode.src = res.config.url;
+      imageNode.className = "image-item";
+      list.appendChild(imageNode);
+    })
+  }
+  function uploadImage () {
+    let reads = new FileReader();
+    let file = document.getElementById('fileInput').files[0];
+    let formData = new FormData();
+    formData.append("file",file,file.name);
+    axios.post('/file/upload',formData).then((res) => {
+      
+    })
+  }
+  const soc = io('http://localhost:3000');
+  //向指定的服务器建立连接，地址可以省略
+  soc.emit('msg','你好服务器');
+  //自定义msg事件，发送‘你好服务器’字符串向服务器
+  soc.on('msg',(data)=>{
+    //监听浏览器通过msg事件发送的信息
+      console.log('接收到服务器数据',data);//你好浏览器
+  });
+  function getImageTable () {
+    axios.get('/myImage/list', {
+      current: 1,
+      size: 10
+    }).then(({data}) => {
+      imageList = data
+      const listDom = document.querySelector('#imageList')
+      listDom.innerHTML = '当前图片列表为:' + imageList.join(',')
+      console.log(data)
+    })
+  }
+  getImageTable();
+  getGrahql();
+</script>
+</html>
